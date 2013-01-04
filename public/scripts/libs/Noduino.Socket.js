@@ -6,13 +6,11 @@ define(function(require, exports, module) {
     }
 
     this.options  = options;
-    this.boards   = [];
-    this.board    = null;
     this.logger   = null;
     this.io       = null;
     this.sockets  = [];
     this.callbacks= {};
-    this.checkSocket();
+    this.checkSocket_();
   };
 
   SocketNoduino.prototype.setLogger = function(Logger) {
@@ -40,40 +38,33 @@ define(function(require, exports, module) {
     return this;
   };
 
-  SocketNoduino.prototype.checkSocket = function() {
+  SocketNoduino.prototype.checkSocket_ = function() {
     /** This is Client code: This works in your web browser */
     if (!this.io) {
       this.io = io.connect(this.options.host);
     }
 
     var that  = this;
-    var board = function( options ){};
 
     this.io.on('response', function(data) {
-      var err = data;
-      switch(data.msg) {
-        case 'board.connect':
-          if (data.response == 'ready') {
-            err=null;
-          }
-          if (that.callbacks[data.msg].length > 0) {
-            var max = that.callbacks[data.msg].length;
-            for (var i = 0; i < max; i++) {
-              if (!that.callbacks[data.msg][i]) {
-                continue;
-              }
-
-              that.callbacks[data.msg][i](err, board);
-              delete that.callbacks[data.msg][i];
+      var message = data.msg;
+      if ( message == 'board.connect' ) {
+        var callbacksForMessage = that.callbacks[ message ];
+        for ( var callbackIndex = 0; callbackIndex < callbacksForMessage.length; callbackIndex++ ) {
+          var callback = callbacksForMessage[ callbackIndex ];
+          if ( callback ) {
+            // If callback exists, call and remove callback.
+            // Why are we deleting data if it's ready?
+            if (data.response == 'ready') {
+              data = null;
             }
+            var board = function( options ){};
+            callback( data, board );
+            delete that.callbacks[ message ][ callbackIndex ];
           }
-        break;
+        }
       }
     });
-  };
-
-  SocketNoduino.prototype.setSocket = function() {
-
   };
 
   SocketNoduino.prototype.connect = function(options, next) {

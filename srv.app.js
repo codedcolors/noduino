@@ -45,7 +45,7 @@ define(['module', 'path', 'fs'], function (module, path, fs) {
    * Serve test page.
    */
   srv.all('/', function(req, res) {
-    res.render('test', {active: 'home', title: 'noduino', 'examples': examples});
+    res.render('test', {active: 'home'});
   });
 
   return {'srv': srv, 'router': router};

@@ -1,59 +1,19 @@
 
 <div class="row example">
   <div id="e2-exampleConnection" class="span12">
-    <p><a href="#" id="e2-buttonConnect" class="btn" name="e2-buttonConnect">Connect to
-    Arduino</a></p>
-
-    <div class="alert alert-info">
-      Please connect to your Arduino using the button.
-    </div>
-
-    <div class="alert hide alert-error">
-      Unable to connect to Arduino!
-    </div>
-
-    <div class="alert hide alert-success">
-      Connection to Arduino established!
-    </div>
+    <p><a href="#" id="e2-buttonConnect" class="btn" name="e2-buttonConnect">Blink every half-second</a></p>
   </div>
 
   <div id="e2-secondStep" class="span12">
-    <p><select id="e2-pinValue" class="span2">
-      <option value="13">
-        PIN: 13
-      </option>
+    <p>
+      <label id="e2-status" style="position: relative; top: -2px;" class="label">LED off</label></p>
 
-      <option value="12">
-        PIN: 12
-      </option>
-
-      <option value="11">
-        PIN: 11
-      </option>
-
-      <option value="10">
-        PIN: 10
-      </option>
-
-      <option value="9">
-        PIN: 09
-      </option>
-    </select><input id="e2-interval" type="text" placeholder="Interval in Miliseconds"
-    class="span3"> <a href="#" style="margin-top: 1px;" id="e2-buttonStart" class="btn"
-    name="e2-buttonStart"> Start blinking LED</a> <a href="#" style="margin-top: 1px;"
-    id="e2-buttonStop" class="btn" name="e2-buttonStop"> Stop</a> <label id="e2-status"
-    style="position: relative; top: -2px;" class="label">LED off</label></p>
-
-    <div class="alert hide alert-info">
-      Please connect to your Arduino using the button.
+    <div class="hide board-error">
+      Board connection error.
     </div>
 
-    <div class="alert hide alert-error">
-      Connect to Arduino first!
-    </div>
-
-    <div class="alert hide alert-success">
-      Connection to Arduino established!
+    <div class="hide error">
+      Error: see console.
     </div>
   </div>
 </div>

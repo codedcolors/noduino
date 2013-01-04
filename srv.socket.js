@@ -4,12 +4,12 @@
  *
  * @package     noduino
  * @author      Sebastian Müller <c@semu.mp>
- * @license     MIT License – http://www.opensource.org/licenses/mit-license.php 
+ * @license     MIT License – http://www.opensource.org/licenses/mit-license.php
  * @url         https://github.com/semu/noduino
  */
- 
+
 define(['socket.io', 'public/scripts/libs/Noduino', 'public/scripts/libs/Noduino.Serial', 'public/scripts/libs/Logger'], function(io, Noduino, Connector, Logger) {
-  
+
   /**
    * Define SocketHandler
    * @param object socket Socket.IO
@@ -20,17 +20,17 @@ define(['socket.io', 'public/scripts/libs/Noduino', 'public/scripts/libs/Noduino
     this.handler  = socket.listen(8090);
     this.handler.set('origin', '*');
     this.pinCache = {};
-    
+
     this.bindings();
   };
-  
+
   /**
    * Get selected Arduino
    */
   SocketHandler.prototype.current = function() {
     return this.arduinos[0];
   };
-  
+
   /**
    * Connect Bindings
    */
@@ -53,7 +53,7 @@ define(['socket.io', 'public/scripts/libs/Noduino', 'public/scripts/libs/Noduino
             that.current().watchAnalogIn({'pin': data.pin}, function(m) {
               if (!m.pin || m.pin == null || m.pin == NaN) {
                 return; }
-              
+
               if (m.state != that.pinCache[m.pin] && curPin == m.pin) {
                 socket.emit('response', {'type': 'analogRead', 'pin': m.pin, 'value': m.state});
                 that.pinCache[m.pin] = m.state;
@@ -65,7 +65,7 @@ define(['socket.io', 'public/scripts/libs/Noduino', 'public/scripts/libs/Noduino
             that.current().watchDigitalIn({'pin': data.pin}, function(m) {
               if (!m.pin || m.pin == null || m.pin == NaN) {
                 return; }
-              
+
               if (m.state != that.pinCache[m.pin] && curPin == m.pin) {
                 socket.emit('response', {'type': 'digitalRead', 'pin': m.pin, 'value': m.state});
                 that.pinCache[m.pin] = m.state;
@@ -77,16 +77,16 @@ define(['socket.io', 'public/scripts/libs/Noduino', 'public/scripts/libs/Noduino
 
       /**
        * Connect to Arduino
-       */      
+       */
       that.sockets[socket.id].on('board.connect', function(data) {
         if (that.current() && that.current().connected == true) {
           return socket.emit('response', {'msg': 'board.connect', 'response': 'ready'}); }
-        
+
         that.arduinos[0] = new Noduino({'debug': true}, Connector, Logger);
         that.current().connect(function(err, board) {
           that.current().connected = false;
           if (err) { return socket.emit('response', {'msg': 'board.connect', 'response': 'failed'}); }
-          
+
           that.current().connected = true;
           return socket.emit('response', {'msg': 'board.connect', 'response': 'ready'});
         });

@@ -7,9 +7,9 @@ require(["jquery"], function($) {
 
     var that = this;
     require(
-      ['scripts/libs/Noduino.js', 'scripts/libs/Noduino.Socket.js', 'scripts/libs/Logger.js'],
-      function( Noduino, Connector, Logger ) {
-        var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, Connector, Logger);
+      ['scripts/libs/Noduino.js', 'scripts/libs/BoardToClientBridge.js', 'scripts/libs/Logger.js'],
+      function( Noduino, BoardToClientBridge, Logger ) {
+        var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, BoardToClientBridge, Logger);
         noduinoConnection.connect( getOnBoardConnectionCallback() );
     });
   }
@@ -29,7 +29,7 @@ require(["jquery"], function($) {
         // Start blinking.
         var that = this;
         if (!that.led) {
-          board.withLED({pin: 13}, function(err, LED) {
+          board.withLED( { pin: 13 }, function( err, LED ) {
             if (err) {
               $('.error').removeClass('hide');
               return console.log(err);

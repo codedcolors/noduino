@@ -7,7 +7,7 @@ require(["jquery"], function($) {
 
     var that = this;
     require(
-      ['scripts/libs/Noduino.js', 'scripts/libs/BoardToClientBridge.js', 'scripts/libs/Logger.js'],
+      ['scripts/libs/Noduino.js', 'scripts/libs/NoduinoClientFacade.js', 'scripts/libs/Logger.js'],
       function( Noduino, BoardToClientBridge, Logger ) {
         var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, BoardToClientBridge, Logger);
         noduinoConnection.connect( getOnBoardConnectionCallback() );

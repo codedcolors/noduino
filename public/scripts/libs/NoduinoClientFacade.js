@@ -180,10 +180,10 @@ define(function(require, exports, module) {
     pin = this._formatPinForArduino( pin );
     var val = ( mode == this.MODE_OUT ) ? this._formatValForArduino( 1 ) : this._formatValForArduino( 0 );
     this.log('info', 'set pin ' + pin + ' mode to ' + val);
-    this.write( '00' + pin + val );
+    this._write( '00' + pin + val );
   };
 
-  BoardToClientBridge.prototype.write = function( commandCode, callback) {
+  BoardToClientBridge.prototype._write = function( commandCode, callback) {
     this.log('info', 'writing: ' + commandCode);
     this._emit( 'serial', {
       'type': 'write',
@@ -200,7 +200,7 @@ define(function(require, exports, module) {
     pin = this._formatPinForArduino(pin);
     val = this._formatValForArduino(val);
     this.log('info', 'analogWrite to pin ' + pin + ': ' + val);
-    this.write('03' + pin + val);
+    this._write('03' + pin + val);
 
     if ( next ) {
       next( null, pin );

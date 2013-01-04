@@ -4,47 +4,49 @@
  *
  * @package     noduino
  * @author      Sebastian Müller <c@semu.mp>
- * @license     MIT License – http://www.opensource.org/licenses/mit-license.php 
+ * @license     MIT License – http://www.opensource.org/licenses/mit-license.php
  * @url         https://github.com/semu/noduino
  */
- 
-define(['kickstart', 'module', 'path', 'fs'], function (kickstart, module, path, fs) {
-  var kickstart = kickstart.withConfig({'name': 'localhost', 'port': 8080, 'path': './'});
-  var srv = kickstart.srv();
-  
-  /**
-   * Load file with example snippets
-   */
-  var fileContents = fs.readFileSync('./examples.snippet'),
-    sections = (fileContents + '').split('###'),
-    examples = {};
-  for (var i = 0; i < sections.length; i++) {
-    var tmp = sections[i].split("\n"),
-      key = tmp.shift();
-    tmp.pop();
-    examples[key] = tmp.join("\n");
-  }
 
-  /** 
-   * Catch request for serving home page
+var express = require("express");
+var connect = require("connect");
+
+define(['module', 'path', 'fs'], function (module, path, fs) {
+  var name = 'localhost';
+  var port = 8080;
+  var path = './';
+
+  var srv = express.createServer();
+  srv.set('views', path + '/views');
+  srv.set('view engine', 'jade');
+  srv.set('view cache', false);
+
+  srv.configure(function() {
+    srv.use(express.cookieParser());
+    srv.use(express.logger(':method :url - :referrer'));
+    srv.use(express.compiler({ src: path + '/public', enable: ['less'] }));
+    srv.use(express.static( path + '/public'));
+    srv.use(express.bodyParser());
+  });
+
+  srv.configure('development', function(){
+    srv.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+  });
+
+  srv.configure('production', function(){
+    srv.use(express.errorHandler());
+  });
+
+  var router = express.createServer(connect.vhost(name, srv));
+  router.use(express.cookieParser());
+  router.listen(port);
+
+  /**
+   * Serve test page.
    */
   srv.all('/', function(req, res) {
-    res.render('home', {jsApp: 'main', active: 'home', title: 'noduino', 'examples': examples});
+    res.render('test', {active: 'home', title: 'noduino', 'examples': examples});
   });
 
-  /** 
-   * Catch request for Getting Started page
-   */
-  srv.all('/getting-started.html', function(req, res) {
-    res.render('getting-started', {jsApp: 'none', active: 'getting-started', title: 'noduino', 'examples': examples});
-  });
-
-  /** 
-   * Catch request for serving walkLED example page
-   */
-  srv.all('/example-walkLED.html', function(req, res) {
-    res.render('example-walkLED', {jsApp: 'walkLED', active: 'examples', title: 'noduino', 'examples': examples});
-  });
-  
-  return {'kickstart': kickstart, 'srv': srv};
+  return {'srv': srv, 'router': router};
 });

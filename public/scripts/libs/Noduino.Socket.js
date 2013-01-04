@@ -8,8 +8,9 @@ define(function(require, exports, module) {
     this.options  = options;
     this.logger   = null;
     this.io       = null;
-    this.sockets  = [];
-    this.callbacks= {};
+    this.callbacksForMessage = {};
+
+    // Get started.
     this.checkSocket_();
   };
 
@@ -21,6 +22,7 @@ define(function(require, exports, module) {
     return this.logger.msg(level, msg);
   };
 
+  // Needs refactoring.
   SocketNoduino.prototype.connection  = 'serial';
   SocketNoduino.prototype.HIGH        = '255';
   SocketNoduino.prototype.LOW         = '000';
@@ -34,24 +36,29 @@ define(function(require, exports, module) {
   SocketNoduino.prototype.TYPE_DIGITALOUT = 0x34;
   SocketNoduino.prototype.TYPE_SPEAKER = 0x35;
 
+  SocketNoduino.prototype.MESSAGES = {};
+  SocketNoduino.prototype.MESSAGES.BOARD_CONNECT = 'board.connect';
+
   SocketNoduino.prototype.current = function() {
     return this;
   };
 
   SocketNoduino.prototype.checkSocket_ = function() {
+    // What does this comment mean?
     /** This is Client code: This works in your web browser */
+    // What is io?
     if (!this.io) {
-      this.io = io.connect(this.options.host);
+      this.io = io.connect( this.options.host );
     }
 
     var that  = this;
 
     this.io.on('response', function(data) {
       var message = data.msg;
-      if ( message == 'board.connect' ) {
-        var callbacksForMessage = that.callbacks[ message ];
-        for ( var callbackIndex = 0; callbackIndex < callbacksForMessage.length; callbackIndex++ ) {
-          var callback = callbacksForMessage[ callbackIndex ];
+      if ( message == SocketNoduino.prototype.MESSAGES.BOARD_CONNECT ) {
+        var callbacks = that.callbacksForMessage[ message ];
+        for ( var callbackIndex = 0; callbackIndex < callbacks.length; callbackIndex++ ) {
+          var callback = callbacks[ callbackIndex ];
           if ( callback ) {
             // If callback exists, call and remove callback.
             // Why are we deleting data if it's ready?
@@ -60,34 +67,45 @@ define(function(require, exports, module) {
             }
             var board = function( options ){};
             callback( data, board );
-            delete that.callbacks[ message ][ callbackIndex ];
+            delete that.callbacksForMessage[ message ][ callbackIndex ];
           }
         }
       }
     });
   };
 
-  SocketNoduino.prototype.connect = function(options, next) {
-    if (!next) {
-      next = options; }
-    if (!this.callbacks['board.connect']) {
-      this.callbacks['board.connect'] = []; }
+  SocketNoduino.prototype.connect = function( options, next ) {
+    // Why do we assigned options to next if next doesn't exist?
+    // Are we doing some sort of recursion maybe? Or queueing?
+    if ( !next ) {
+      next = options;
+    }
 
-    this.callbacks['board.connect'].push(next);
+    var connectionCallbacks = this.callbacksForMessage[ SocketNoduino.prototype.MESSAGES.BOARD_CONNECT ] || [];
+    connectionCallbacks.push( next );
+    this.callbacksForMessage[ SocketNoduino.prototype.MESSAGES.BOARD_CONNECT ] = connectionCallbacks;
+
     this.log('sending command through socket');
-    this.pushSocket('board.connect');
+    this.pushSocket_( SocketNoduino.prototype.MESSAGES.BOARD_CONNECT );
 
     return;
   }
 
-  SocketNoduino.prototype.pushSocket = function(type, data) {
+  SocketNoduino.prototype.pushSocket_ = function(type, data) {
     this.log('socket-write', type + ': ' + JSON.stringify(data));
-    this.io.emit(type, data);
+    this.io.emit( type, data );
   }
+
+
+
+
+
+
+
 
   SocketNoduino.prototype.write = function(cmd, callback) {
     this.log('info', 'writing: ' + cmd);
-    this.pushSocket('serial', {'type': 'write', 'write': cmd, 'id': this.io.socket.sessionid});
+    this.pushSocket_('serial', {'type': 'write', 'write': cmd, 'id': this.io.socket.sessionid});
   };
 
   SocketNoduino.prototype.pinMode = function(pin, val) {
@@ -147,11 +165,11 @@ define(function(require, exports, module) {
   }
 
   SocketNoduino.prototype.analogRead = function (pin) {
-    this.pushSocket('serial', {'type': 'analogRead', 'pin': this.normalizePin(pin)});
+    this.pushSocket_('serial', {'type': 'analogRead', 'pin': this.normalizePin(pin)});
   }
 
   SocketNoduino.prototype.digitalRead = function (pin) {
-    this.pushSocket('serial', {'type': 'digitalRead', 'pin': this.normalizePin(pin)});
+    this.pushSocket_('serial', {'type': 'digitalRead', 'pin': this.normalizePin(pin)});
   }
 
   SocketNoduino.prototype.watchDigitalIn = function(DigitalIn) {

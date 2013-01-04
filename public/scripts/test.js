@@ -1,5 +1,19 @@
 require(["jquery"], function($) {
 
+  var runTest = function() {
+    $('#e2-exampleConnection .alert').addClass('hide');
+    $('#e2-exampleConnection .alert-info').removeClass('hide');
+    $('#e2-exampleConnection .alert-info').html('Trying to connect to your Arduino…');
+
+    var that = this;
+    require(
+      ['scripts/libs/Noduino.js', 'scripts/libs/Noduino.Socket.js', 'scripts/libs/Logger.js'],
+      function( Noduino, Connector, Logger ) {
+        var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, Connector, Logger);
+        noduinoConnection.connect( getOnBoardConnectionCallback() );
+    });
+  }
+
   var getOnBoardConnectionCallback = function() {
     return function(err, board) {
 
@@ -44,19 +58,15 @@ require(["jquery"], function($) {
     // Listen for button click.
     $('#e2-buttonConnect').click(function(e) {
       e.preventDefault();
+      runTest();
+    });
 
-      $('#e2-exampleConnection .alert').addClass('hide');
-      $('#e2-exampleConnection .alert-info').removeClass('hide');
-      $('#e2-exampleConnection .alert-info').html('Trying to connect to your Arduino…');
-
-      var that = this;
-      require(
-        ['scripts/libs/Noduino.js', 'scripts/libs/Noduino.Socket.js', 'scripts/libs/Logger.js'],
-        function( Noduino, Connector, Logger ) {
-          var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, Connector, Logger);
-          noduinoConnection.connect( getOnBoardConnectionCallback() );
-      });
-
+    // Listen for space bar or enter press.
+    $( document ).keypress( function(e) {
+      var keyCode = e.keyCode;
+      if ( keyCode == 32 || keyCode == 13 ) {
+        runTest();
+      }
     });
 
   });

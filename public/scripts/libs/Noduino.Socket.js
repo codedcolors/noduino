@@ -74,15 +74,15 @@ define(function(require, exports, module) {
     });
   };
 
-  SocketNoduino.prototype.connect = function( options, next ) {
-    // Why do we assigned options to next if next doesn't exist?
+  SocketNoduino.prototype.connect = function( optionalCallback, nextCallback ) {
+    // Why do we assign options to next when next doesn't exist?
     // Are we doing some sort of recursion maybe? Or queueing?
-    if ( !next ) {
-      next = options;
+    if ( !nextCallback ) {
+      nextCallback = optionalCallback;
     }
 
     var connectionCallbacks = this.callbacksForMessage[ SocketNoduino.prototype.MESSAGES.BOARD_CONNECT ] || [];
-    connectionCallbacks.push( next );
+    connectionCallbacks.push( nextCallback );
     this.callbacksForMessage[ SocketNoduino.prototype.MESSAGES.BOARD_CONNECT ] = connectionCallbacks;
 
     this.log('sending command through socket');

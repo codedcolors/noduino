@@ -1,6 +1,6 @@
 define(function() {
-  
-  function DigitalOutput(options, Connector) { 
+
+  function DigitalOutput(options, Connector) {
     if (false === (this instanceof DigitalOutput)) {
       return new DigitalOutput(options); }
 
@@ -17,7 +17,7 @@ define(function() {
       this.emit('on');
       this.emit('change');
     }
-    
+
     if (callback) {
       callback(); }
   };
@@ -29,7 +29,7 @@ define(function() {
       this.emit('off');
       this.emit('change');
     }
-    
+
     if (callback) {
       callback(); }
   };
@@ -37,7 +37,7 @@ define(function() {
   DigitalOutput.prototype.set = function(mode, callback) {
     this.c.current().digitalWrite(this.pin, this.mode = mode, callback);
   };
-  
+
   DigitalOutput.prototype.clear = function(event) {
     this.events[event] = [];
   };
@@ -54,6 +54,6 @@ define(function() {
     for (var i = 0; i < this.events[event].length; i++) {
       this.events[event][i](this); }
   };
-  
+
   return DigitalOutput;
 });

@@ -8,13 +8,13 @@ require(["jquery"], function($) {
     var that = this;
     require(
       ['scripts/libs/Noduino.js', 'scripts/libs/NoduinoClientFacade.js', 'scripts/libs/Logger.js'],
-      function( Noduino, BoardToClientBridge, Logger ) {
-        var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, BoardToClientBridge, Logger);
-        noduinoConnection.connect( getOnBoardConnectionCallback() );
+      function( Noduino, NoduinoClientFacade, Logger ) {
+        var noduinoConnection = new Noduino({debug: false, host: 'http://localhost:8090'}, NoduinoClientFacade, Logger);
+        noduinoConnection.connect( getOnBoardConnectedCallback() );
     });
   }
 
-  var getOnBoardConnectionCallback = function() {
+  var getOnBoardConnectedCallback = function() {
     return function(err, board) {
 
       $('#e2-exampleConnection .alert').addClass('hide');
@@ -26,6 +26,22 @@ require(["jquery"], function($) {
 
         console.log("Success connecting to board.");
 
+        if ( !this.led ) {
+          this.led = board.getLed( { pin: 13 } );
+        }
+        this.led.blink( 500 );
+        var $statusIndicator = $('#e2-status');
+        this.led.on( 'change', function( data ) {
+          if ( data.mode == '000' ) {
+            $statusIndicator.removeClass( 'label-success' );
+            $statusIndicator.html( 'OFF' );
+          } else {
+            $statusIndicator.addClass( 'label-success' );
+            $statusIndicator.html( 'ON' );
+          }
+        });
+
+        /*
         // Start blinking.
         var that = this;
         if (!that.led) {
@@ -49,6 +65,7 @@ require(["jquery"], function($) {
         } else {
           that.led.blink(interval);
         }
+        */
       }
     }
   }
